@@ -1,0 +1,22 @@
+SKU	ProductName	Description	Condition	ProductType	Brand	SupplierName	Tags	CostPrice	RetailPrice	CurrentStockLevel	DateCreatedAt	DateDiscontinuedAt	IsActive
+SEN23322	Manfrotto MN1004BAC Master Light Stand 	Master Light Stand	Display	ACCESSORY	SENNHEISER	SENNHEISER	TRIPODS	57.98	114.99	2	10/05/2015	01/01/1900	1
+SO6677	Manfrotto MT057C3 Carbon Fibre 3 Section Geared 	Carbon Fibre 3 Section Geared	Display	ACCESSORY	SONY	SONY	TRIPODS	298.97	584.99	5	10/05/2015	01/01/1900	1
+JV2222	Rycote 37705 Portable Recorder Suspension 	Portable Recorder Suspension	New	CAMCORDER	JVC	JVC	CAMACC	0	59.99	6	10/05/2015	01/01/1900	1
+SEN222	Hoya 37S-HOY 37MM SKYLIGHT FILTER Hoya 	37MM SKYLIGHT FILTER Hoya	New	IMAGING	SENNHEISER	SENNHEISER	"Discontinued, FILTERS"	0.01	19.89	18	10/05/2015	01/01/1900	1
+TOW222	HOYA 40.5mm CP Filter - Slim 	HOYA 40.5mm CP Filter - Slim	New	IMAGING	TOSHIBA	TOSHIBA	FILTERS	17.08	34.99	8	10/05/2015	01/01/1900	1
+MS7771	Rycote 41118 Portable Recorder Suspension 	Portable Recorder Suspension	New	CAMCORDER	MSCS	MSCS	CAMACC	0	59.99	1	10/05/2015	01/01/1900	1
+CO8211	Rycote 41126 Invision Video Hotshoe 	Invision Video Hotshoe	New	CAMCORDER	TOSHIBA	TOSHIBA	CAMACC	0	49.99	8	10/05/2015	01/01/1900	1
+CO2J111	Rycote 41127 Invision Video Hotshoe 	Invision Video Hotshoe	New	CAMCORDER	MSCS	MSCS	CAMACC	0	49.99	3	10/05/2015	01/01/1900	1
+SOL2222	Rycote 41128 Invision Video Hotshoe 	Invision Video Hotshoe	New	CAMCORDER	MSCS	MSCS	CAMACC	0	49.99	4	10/05/2015	01/01/1900	1
+SOl2211	Verbatim 43441 Light Scribe CD spindle 	Light Scribe CD spindle	New	ACCESSORY	MSCS	MSCS	"Discontinued, RECMEDIA"	0.01	7.99	3	10/05/2015	01/01/1900	1
+TOMCC	Hoya 46mm Slim PL-CIR (Circular Polarising) Filter	HOYA 46mm CP Filter - Slim	New	IMAGING	Hoya	TOSHIBA	FILTERS	18.75	34.99	7	10/05/2015	01/01/1900	1
+SO9999	Hoya Revo 52mm SMC UV Filter 	Hoya Revo 52mm SMC UV Filter	New	IMAGING	Hoya	Sony	FILTERS	20.4	49.99	8	10/05/2015	01/01/1900	1
+JVRRRR2	Rycote 55314 Full Windshield Kit 	Full Windshield Kit	New	ACCESSORY	Rycote	JVC	MICROPHONE	0	429.99	2	10/05/2015	01/01/1900	1
+SUM33444	Rycote 55384 Full Windshield Kit 	Full Windshield Kit	New	ACCESSORY	Rycote	Samsung	MICROPHONE	0	429.99	6	10/05/2015	01/01/1900	1
+TOHDCC	Rycote 55409 Full Windshield Kit 	Full Windshield Kit	New	ACCESSORY	Rycote	TOSHIBA	MICROPHONE	0	429.99	2	10/05/2015	01/01/1900	1
+CANI999	Rycote 55410 Full Windshield Kit 	Full Windshield Kit	New	ACCESSORY	Rycote	CANON	MICROPHONE	0	429.99	3	10/05/2015	01/01/1900	1
+JV66622	Rycote 55412 Full Windshield Kit 	Full Windshield Kit	New	ACCESSORY	Rycote	JVC	MICROPHONE	0	429.99	10	10/05/2015	01/01/1900	1
+TO2333	Rycote 55417 Full Windshield Kit 	Full Windshield Kit	New	ACCESSORY	Rycote	TOSHIBA	MICROPHONE	0	429.99	10	10/05/2015	01/01/1900	1
+SAMrr22	Rycote 55430 Full Windshield Kit 	Full Windshield Kit	New	ACCESSORY	Rycote	Samsung	MICROPHONE	0	429.99	0	10/05/2015	01/01/1900	1
+SO777W	Rycote 55438 Full Windshield Kit 	Full Windshield Kit	New	ACCESSORY	Rycote	Sony	MICROPHONE	0	429.99	4	10/05/2015	01/01/1900	1
+SOY992	Rycote 55439 Full Windshield Kit 	Full Windshield Kit	New	ACCESSORY	Rycote	Sony	MICROPHONE	0	429.99	4	10/05/2015	01/01/1900	1

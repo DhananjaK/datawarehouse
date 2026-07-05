@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!--
+  Hadoop core-site.xml for Pig container
+  Tells Pig where the HDFS NameNode is.
+  Mounted read-only into /pig/conf inside the dw-pig container.
+-->
+<configuration>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://namenode:9000</value>
+  </property>
+</configuration>

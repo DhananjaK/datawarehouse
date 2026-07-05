@@ -1,0 +1,241 @@
+# ── Shared Airflow/Spark anchor ─────────────────────────────
+x-airflow-common: &airflow-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  environment:
+    - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow_secure_2024@postgres/airflow
+    - AIRFLOW__CORE__FERNET_KEY=FB1Z_t9m6A4v2F9kL2pZ5uG_7b8N9M0P1Q2R3S4T5U6=
+    - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    - SPARK_HOME=/opt/spark
+    - SPARK_MASTER=spark://spark-master:7077
+  volumes:
+    - /opt/datawarehouse/airflow/dags:/opt/airflow/dags
+    - /opt/datawarehouse/airflow/logs:/opt/airflow/logs
+    - /opt/datawarehouse/airflow/plugins:/opt/airflow/plugins
+    - /opt/datawarehouse/airflow/scripts:/opt/airflow/scripts
+    - /opt/datawarehouse/data/input:/opt/airflow/data/input
+    - /opt/datawarehouse/data/output:/opt/airflow/data/output
+    - /opt/datawarehouse/spark/warehouse:/opt/spark/spark-warehouse
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+# ── Shared Hadoop environment variables ─────────────────────
+x-hadoop-env: &hadoop-env
+  CORE_CONF_fs_defaultFS: hdfs://namenode:9000
+  CORE_CONF_hadoop_http_staticuser_user: root
+  HDFS_CONF_dfs_replication: 1
+  HDFS_CONF_dfs_permissions_enabled: "false"
+
+services:
+
+  # ── 1. PostgreSQL ─────────────────────────────────────────
+  postgres:
+    image: postgres:13-alpine
+    container_name: dw-postgres
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow_secure_2024
+      - POSTGRES_DB=airflow
+    volumes:
+      # Persistent data on host — survives container removal
+      - /opt/datawarehouse/postgres/data:/var/lib/postgresql/data
+      # Init script creates hive_metastore DB + hive user on first boot
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      # Remote DB tools: 10.10.20.134:5432
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # ── 2. Microsoft SQL Server 2022 (Source DB) ──────────────
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: dw-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourStrongE4TLPassword!
+    ports:
+      # Remote: 10.10.20.134:1433
+      - "1433:1433"
+    restart: unless-stopped
+
+  # ── 3. Hadoop NameNode ────────────────────────────────────
+  namenode:
+    # Hadoop 2.7.4 — must match bde2020/hive:2.3.2 which bundles Hadoop 2.7.4 client
+    image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
+    container_name: dw-namenode
+    environment:
+      <<: *hadoop-env
+      CLUSTER_NAME: dw-cluster
+    volumes:
+      # HDFS metadata (fsimage, edit logs) — CRITICAL: must survive restarts
+      - /opt/datawarehouse/hadoop/namenode:/hadoop/dfs/name
+    ports:
+      # NameNode Web UI (Hadoop 2.x uses 50070, not 9870): http://10.10.20.134:50070
+      - "50070:50070"
+      # HDFS RPC (Spark, Hive, Pig): hdfs://10.10.20.134:9000
+      - "9000:9000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:50070/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # ── 4. Hadoop DataNode ────────────────────────────────────
+  datanode:
+    # Must match namenode version
+    image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
+    container_name: dw-datanode
+    environment:
+      <<: *hadoop-env
+    volumes:
+      # Actual HDFS block data lives here
+      - /opt/datawarehouse/hadoop/datanode:/hadoop/dfs/data
+    depends_on:
+      namenode:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── 5. Hive Metastore ─────────────────────────────────────
+  hive-metastore:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: dw-hive-metastore
+    command: /opt/hive/bin/hive --service metastore
+    environment:
+      <<: *hadoop-env
+      # DB_TYPE is read by bde2020/hive's own startup.sh to call schematool
+      DB_TYPE: postgres
+      # hive-site.xml overrides: dots replaced with underscores
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://postgres/hive_metastore"
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: "org.postgresql.Driver"
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: "hive"
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: "hive_secure_2024"
+      # DataNucleus 4.x property names (image uses datanucleus-rdbms-4.1.19)
+      # Old DN3 names (autoCreateSchema, autoCreateAll) are ignored by DN4
+      HIVE_SITE_CONF_datanucleus_schema_autoCreateTables: "true"
+      HIVE_SITE_CONF_datanucleus_schema_autoCreateColumns: "true"
+      HIVE_SITE_CONF_datanucleus_schema_autoCreate: "true"
+      HIVE_SITE_CONF_datanucleus_fixedDatastore: "false"
+      HIVE_SITE_CONF_hive_metastore_schema_verification: "false"
+      HIVE_SITE_CONF_hive_metastore_warehouse_dir: "hdfs://namenode:9000/user/hive/warehouse"
+    ports:
+      # Thrift metastore port (HiveServer2, Spark connect here)
+      - "9083:9083"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      namenode:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── 6. HiveServer2 ────────────────────────────────────────
+  hive-server:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: dw-hive-server
+    command: /opt/hive/bin/hive --service hiveserver2
+    environment:
+      <<: *hadoop-env
+      HIVE_SITE_CONF_hive_metastore_uris: "thrift://hive-metastore:9083"
+      HIVE_SITE_CONF_hive_server2_thrift_bind_host: "0.0.0.0"
+      HIVE_SITE_CONF_hive_metastore_warehouse_dir: "hdfs://namenode:9000/user/hive/warehouse"
+      # Disable client impersonation — HiveServer2 runs HDFS ops as its own service user.
+      # Required for lab/dev environments where Hadoop proxy-user ACLs are not configured.
+      HIVE_SITE_CONF_hive_server2_enable_doAs: "false"
+    ports:
+      # Beeline/JDBC: jdbc:hive2://10.10.20.134:10000
+      - "10000:10000"
+      # Hive Web UI: http://10.10.20.134:10002
+      - "10002:10002"
+    depends_on:
+      - hive-metastore
+    restart: unless-stopped
+
+  # ── 7. Airflow Webserver ──────────────────────────────────
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: dw-airflow-webserver
+    command: >
+      bash -c "
+        airflow db migrate &&
+        airflow users create
+          --username airflow
+          --password airflow
+          --firstname Admin
+          --lastname User
+          --role Admin
+          --email admin@example.com || true &&
+        airflow webserver
+      "
+    ports:
+      # Airflow UI: http://10.10.20.134:8080
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── 8. Airflow Scheduler ──────────────────────────────────
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: dw-airflow-scheduler
+    command: bash -c "airflow db migrate && airflow scheduler"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── 9. Spark Master ───────────────────────────────────────
+  spark-master:
+    <<: *airflow-common
+    container_name: dw-spark-master
+    entrypoint: []
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    ports:
+      # Spark Master Web UI: http://10.10.20.134:8081
+      - "8081:8081"
+      # Spark submit: spark://10.10.20.134:7077
+      - "7077:7077"
+    restart: unless-stopped
+
+  # ── 10. Spark Worker ──────────────────────────────────────
+  spark-worker:
+    <<: *airflow-common
+    container_name: dw-spark-worker
+    entrypoint: []
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    depends_on:
+      - spark-master
+    restart: unless-stopped
+
+  # ── 11. Apache Pig ────────────────────────────────────────
+  pig:
+    build:
+      context: .
+      dockerfile: Dockerfile.pig
+    container_name: dw-pig
+    environment:
+      - HADOOP_CONF_DIR=/pig/conf
+    volumes:
+      # Pig Latin scripts
+      - /opt/datawarehouse/pig/scripts:/pig/scripts
+      # Shared data (same directories Airflow/Spark use)
+      - /opt/datawarehouse/data/input:/pig/data/input
+      - /opt/datawarehouse/data/output:/pig/data/output
+      # Hadoop config so Pig knows where HDFS namenode is
+      - ./conf:/pig/conf:ro
+    depends_on:
+      namenode:
+        condition: service_healthy
+    restart: unless-stopped
+
+# ── NO named volumes — everything is a host bind mount ──────
+# Remove old named volume declarations; all data is on the host

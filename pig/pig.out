@@ -1,0 +1,211 @@
+======================================================
+  ABC DW — Apache Pig Business Requirements
+======================================================
+
+[Step 1] Copying .pig scripts to /opt/datawarehouse/data/input/...
+  Copied: pig_r01_daily_stock_levels.pig
+  Copied: pig_r02_weekly_min_stock.pig
+  Copied: pig_r03_stock_by_brand_type_supplier.pig
+  Copied: pig_r04_orders_daily_weekly.pig
+  Copied: pig_r05_received_by_supplier_month.pig
+  Done. Scripts now visible in container at /pig/data/input/
+
+[Step 2] Removing existing Pig output directories in HDFS...
+  Cleared: /data/warehouse/pig_results/r01_daily_stock_levels
+  Cleared: /data/warehouse/pig_results/r02_weekly_min_stock_detail
+  Cleared: /data/warehouse/pig_results/r02_weekly_min_stock_summary
+  Cleared: /data/warehouse/pig_results/r03_stock_by_brand
+  Cleared: /data/warehouse/pig_results/r03_stock_by_type
+  Cleared: /data/warehouse/pig_results/r03_stock_by_supplier
+  Cleared: /data/warehouse/pig_results/r04_sent_daily
+  Cleared: /data/warehouse/pig_results/r04_sent_weekly
+  Cleared: /data/warehouse/pig_results/r04_received_daily
+  Cleared: /data/warehouse/pig_results/r04_received_monthly
+  Cleared: /data/warehouse/pig_results/r05_received_by_supplier
+  Cleared: /data/warehouse/pig_results/r05_received_by_month
+  Cleared: /data/warehouse/pig_results/r05_received_by_supplier_month
+  Done.
+
+────────────────────────────────────────────────────
+  Req 1: Daily stock levels of all products
+  Script: pig_r01_daily_stock_levels.pig
+────────────────────────────────────────────────────
+2026-07-01 19:33:52,329 INFO  [main] pig.ExecTypeProvider (ExecTypeProvider.java:selectExecType(41)) - Trying ExecType : LOCAL
+2026-07-01 19:33:52,331 INFO  [main] pig.ExecTypeProvider (ExecTypeProvider.java:selectExecType(41)) - Trying ExecType : MAPREDUCE
+2026-07-01 19:33:52,331 INFO  [main] pig.ExecTypeProvider (ExecTypeProvider.java:selectExecType(43)) - Picked MAPREDUCE as the ExecType
+  [OK] pig_r01_daily_stock_levels.pig completed.
+
+────────────────────────────────────────────────────
+  Req 2: Weekly report — products below minimum stock level
+  Script: pig_r02_weekly_min_stock.pig
+────────────────────────────────────────────────────
+2026-07-01 19:34:11,231 INFO  [main] pig.ExecTypeProvider (ExecTypeProvider.java:selectExecType(41)) - Trying ExecType : LOCAL
+2026-07-01 19:34:11,233 INFO  [main] pig.ExecTypeProvider (ExecTypeProvider.java:selectExecType(41)) - Trying ExecType : MAPREDUCE
+2026-07-01 19:34:11,233 INFO  [main] pig.ExecTypeProvider (ExecTypeProvider.java:selectExecType(43)) - Picked MAPREDUCE as the ExecType
+  [OK] pig_r02_weekly_min_stock.pig completed.
+
+────────────────────────────────────────────────────
+  Req 3: Stock analysis by brand, product type, and supplier
+  Script: pig_r03_stock_by_brand_type_supplier.pig
+────────────────────────────────────────────────────
+2026-07-01 19:34:31,976 INFO  [main] pig.ExecTypeProvider (ExecTypeProvider.java:selectExecType(41)) - Trying ExecType : LOCAL
+2026-07-01 19:34:31,978 INFO  [main] pig.ExecTypeProvider (ExecTypeProvider.java:selectExecType(41)) - Trying ExecType : MAPREDUCE
+2026-07-01 19:34:31,978 INFO  [main] pig.ExecTypeProvider (ExecTypeProvider.java:selectExecType(43)) - Picked MAPREDUCE as the ExecType
+  [OK] pig_r03_stock_by_brand_type_supplier.pig completed.
+
+────────────────────────────────────────────────────
+  Req 4: Daily and weekly sent and received purchase orders
+  Script: pig_r04_orders_daily_weekly.pig
+────────────────────────────────────────────────────
+2026-07-01 19:34:53,827 INFO  [main] pig.ExecTypeProvider (ExecTypeProvider.java:selectExecType(41)) - Trying ExecType : LOCAL
+2026-07-01 19:34:53,829 INFO  [main] pig.ExecTypeProvider (ExecTypeProvider.java:selectExecType(41)) - Trying ExecType : MAPREDUCE
+2026-07-01 19:34:53,829 INFO  [main] pig.ExecTypeProvider (ExecTypeProvider.java:selectExecType(43)) - Picked MAPREDUCE as the ExecType
+  [OK] pig_r04_orders_daily_weekly.pig completed.
+
+────────────────────────────────────────────────────
+  Req 5: Received orders by supplier and by month
+  Script: pig_r05_received_by_supplier_month.pig
+────────────────────────────────────────────────────
+2026-07-01 19:35:16,264 INFO  [main] pig.ExecTypeProvider (ExecTypeProvider.java:selectExecType(41)) - Trying ExecType : LOCAL
+2026-07-01 19:35:16,269 INFO  [main] pig.ExecTypeProvider (ExecTypeProvider.java:selectExecType(41)) - Trying ExecType : MAPREDUCE
+2026-07-01 19:35:16,269 INFO  [main] pig.ExecTypeProvider (ExecTypeProvider.java:selectExecType(43)) - Picked MAPREDUCE as the ExecType
+  [OK] pig_r05_received_by_supplier_month.pig completed.
+
+======================================================
+  Results Summary
+======================================================
+
+  Req 1 — Daily stock levels
+  Path:    /data/warehouse/pig_results/r01_daily_stock_levels
+  Columns: FullDate, SKU, ProductName, ProductType, Brand, SupplierName, MinStockLevel, CurrentStockLevel, StockValueAtRetail, BelowMinStock
+  Rows:    63
+  Sample:
+    2016-10-31,CANI999,Rycote 55410 Full Windshield Kit,ACCESSORY,Rycote,CANON,2,3,1289.97,NO
+    2016-10-31,CO2J111,Rycote 41127 Invision Video Hotshoe,CAMCORDER,MSCS,MSCS,2,3,149.97,NO
+    2016-10-31,CO8211,Rycote 41126 Invision Video Hotshoe,CAMCORDER,TOSHIBA,TOSHIBA,2,8,399.92,NO
+    2016-10-31,JV2222,Rycote 37705 Portable Recorder Suspension,CAMCORDER,JVC,JVC,2,6,359.94,NO
+    2016-10-31,JV66622,Rycote 55412 Full Windshield Kit,ACCESSORY,Rycote,JVC,2,10,4299.9,NO
+  ──────────────────────────────────────────────────
+
+  Req 2 — Min stock detail (per product per week)
+  Path:    /data/warehouse/pig_results/r02_weekly_min_stock_detail
+  Columns: CalendarYear, WeekOfYear, FullDate, SKU, ProductName, Brand, SupplierName, MinStockLevel, CurrentStockLevel
+  Rows:    18
+  Sample:
+    2016,44,2016-10-31,JVRRRR2,Rycote 55314 Full Windshield Kit,Rycote,JVC,2,2
+    2016,44,2016-10-31,MS7771,Rycote 41118 Portable Recorder Suspension,MSCS,MSCS,2,1
+    2016,44,2016-10-31,SAMrr22,Rycote 55430 Full Windshield Kit,Rycote,Samsung,2,0
+    2016,44,2016-10-31,SEN23322,Manfrotto MN1004BAC Master Light Stand,SENNHEISER,SENNHEISER,2,2
+    2016,44,2016-10-31,TOHDCC,Rycote 55409 Full Windshield Kit,Rycote,TOSHIBA,2,2
+  ──────────────────────────────────────────────────
+
+  Req 2 — Min stock weekly summary (count by week)
+  Path:    /data/warehouse/pig_results/r02_weekly_min_stock_summary
+  Columns: CalendarYear, WeekOfYear, ProductsBelowMin
+  Rows:    2
+  Sample:
+    2016,44,5
+    2016,45,13
+  ──────────────────────────────────────────────────
+
+  Req 3 — Stock by Brand
+  Path:    /data/warehouse/pig_results/r03_stock_by_brand
+  Columns: Brand, TotalUnits, TotalCostValue, TotalRetailValue, ProductLines
+  Rows:    7
+  Sample:
+    Rycote,34,0.0,14619.66,9
+    SONY,3,896.91,1754.97,1
+    Hoya,13,256.95,574.87,2
+    TOSHIBA,12,68.32,539.88,2
+    MSCS,11,0.03,433.89,4
+  ──────────────────────────────────────────────────
+
+  Req 3 — Stock by ProductType
+  Path:    /data/warehouse/pig_results/r03_stock_by_type
+  Columns: ProductType, TotalUnits, TotalCostValue, TotalRetailValue, ProductLines
+  Rows:    3
+  Sample:
+    ACCESSORY,40,896.9399999999999,16398.6,12
+    CAMCORDER,20,0.0,1049.8,5
+    IMAGING,27,325.37,913.7299999999999,4
+  ──────────────────────────────────────────────────
+
+  Req 3 — Stock by Supplier
+  Path:    /data/warehouse/pig_results/r03_stock_by_supplier
+  Columns: SupplierName, TotalUnits, TotalCostValue, TotalRetailValue, ProductLines
+  Rows:    7
+  Sample:
+    SONY,17,1060.11,4734.83,4
+    TOSHIBA,26,162.07,4584.74,5
+    Samsung,8,0.0,3439.92,2
+    JVC,11,0.0,3249.89,3
+    CANON,4,0.0,1719.96,1
+  ──────────────────────────────────────────────────
+
+  Req 4 — Sent orders daily
+  Path:    /data/warehouse/pig_results/r04_sent_daily
+  Columns: SentDate, OrderLines, TotalQtyOrdered
+  Rows:    1
+  Sample:
+    2015-10-30,11,19
+  ──────────────────────────────────────────────────
+
+  Req 4 — Sent orders weekly
+  Path:    /data/warehouse/pig_results/r04_sent_weekly
+  Columns: CalendarYear, WeekOfYear, OrderLines, TotalQtyOrdered
+  Rows:    1
+  Sample:
+    2015,44,11,19
+  ──────────────────────────────────────────────────
+
+  Req 4 — Received orders daily
+  Path:    /data/warehouse/pig_results/r04_received_daily
+  Columns: ReceivedDate, OrderLines, TotalQtyOrdered, TotalQtyReceived, TotalUnfulfilled
+  Rows:    4
+  Sample:
+    2016-11-06,5,19,15,4
+    2016-11-16,1,1,1,0
+    2016-11-17,2,2,2,0
+    2016-11-18,2,5,1,4
+  ──────────────────────────────────────────────────
+
+  Req 4 — Received orders monthly
+  Path:    /data/warehouse/pig_results/r04_received_monthly
+  Columns: YearMonth, OrderLines, TotalQtyOrdered, TotalQtyReceived, TotalUnfulfilled
+  Rows:    1
+  Sample:
+    2016-11,10,27,19,8
+  ──────────────────────────────────────────────────
+
+  Req 5 — Received by Supplier
+  Path:    /data/warehouse/pig_results/r05_received_by_supplier
+  Columns: SupplierName, OrderLines, TotalOrdered, TotalReceived, TotalUnfulfilled, MinLeadDays, MaxLeadDays, AvgLeadDays
+  Rows:    5
+  Sample:
+    JVC,1,6,6,0,6,6,6.0
+    MSCS,4,7,3,4,0,11,7.75
+    SENNHEISER,2,9,9,0,6,6,6.0
+    SONY,1,2,0,2,6,6,6.0
+    TOSHIBA,2,3,1,2,1,6,3.5
+  ──────────────────────────────────────────────────
+
+  Req 5 — Received by Month
+  Path:    /data/warehouse/pig_results/r05_received_by_month
+  Columns: YearMonth, OrderLines, TotalOrdered, TotalReceived, TotalUnfulfilled
+  Rows:    1
+  Sample:
+    2016-11,10,27,19,8
+  ──────────────────────────────────────────────────
+
+  Req 5 — Received by Supplier + Month
+  Path:    /data/warehouse/pig_results/r05_received_by_supplier_month
+  Columns: SupplierName, YearMonth, OrderLines, TotalOrdered, TotalReceived, TotalUnfulfilled, AvgLeadDays
+  Rows:    5
+  Sample:
+    JVC,2016-11,1,6,6,0,6.0
+    MSCS,2016-11,4,7,3,4,7.75
+    SENNHEISER,2016-11,2,9,9,0,6.0
+    SONY,2016-11,1,2,0,2,6.0
+    TOSHIBA,2016-11,2,3,1,2,3.5
+  ──────────────────────────────────────────────────
+
